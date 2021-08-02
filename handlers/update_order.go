@@ -24,6 +24,8 @@ func HandlerUpdateOrder(w http.ResponseWriter, r *http.Request) {
 	mapRetail, _ := ParserJSONWithoutStruct(body)
 
 	if mapRetail["status"].(string) == "client-confirmed" {
+		bodyReq.Status = "processing"
+	} else if mapRetail["status"].(string) == "assembling-complete" {
 		bodyReq.Status = "confirmed"
 	} else if mapRetail["status"].(string) == "send-delivery-courier" {
 		bodyReq.Status = "shipping"
@@ -31,6 +33,7 @@ func HandlerUpdateOrder(w http.ResponseWriter, r *http.Request) {
 		bodyReq.Status = "delivered"
 	}
 	jsonBody, _ := json.Marshal(bodyReq)
+	fmt.Println(string(jsonBody))
 	fmt.Println("----------------------------------------------------------------------------")
 	client := &http.Client{}
 	url := fmt.Sprintf("https://cart.api.onliner.by/orders/%s", mapRetail["key"].(string))
@@ -39,7 +42,7 @@ func HandlerUpdateOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("[SERVICES:ONLINER] Error while creating new request. Error description : ", err)
 	}
-	req.Header.Add("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyX3R5cGUiOiJiMmJfc2hvcCIsInVzZXJfZGF0YSI6eyJpZCI6MTgyMjEsIm5hbWUiOiJcdTA0MThcdTA0MjBcdTA0MWRcdTA0MTBcdTA0MjJcdTA0MTAifSwiYXBpX3R5cGUiOiJjYXJ0IiwiYjJiX29wZXJhdG9yIjoiMTgyMjFAYXBpLWNsaWVudC5jYXJ0IiwiaWF0IjoxNjI3OTExMjM5LCJzY29wZXMiOltdLCJleHAiOjE2Mjc5MTQ4Mzl9.yy2d-17LyY82npABUiG1On2vLryjjMLbXNgmxgLIo432Jb03ADqJxxtIB2idNntU2xcOA5IjHzXSJgim8VCc7Q")
+	req.Header.Add("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyX3R5cGUiOiJiMmJfc2hvcCIsInVzZXJfZGF0YSI6eyJpZCI6MTgyMjEsIm5hbWUiOiJcdTA0MThcdTA0MjBcdTA0MWRcdTA0MTBcdTA0MjJcdTA0MTAifSwiYXBpX3R5cGUiOiJjYXJ0IiwiYjJiX29wZXJhdG9yIjoiMTgyMjFAYXBpLWNsaWVudC5jYXJ0IiwiaWF0IjoxNjI3OTM1NTA0LCJzY29wZXMiOltdLCJleHAiOjE2Mjc5MzkxMDR9.Nv0EZIC6uCzQg89Ivt8e9s2d6dgLqvyHTRfH7kpT5x_NBI7c2jsAIzpFeGZ2Menta2C1UJcN7LqHe2pRqssSCA")
 	req.Header.Add("Accept", "application/json; charset=utf-8")
 	req.Header.Add("Content-Type", "application/json; charset=utf-8")
 	resp, err := client.Do(req)
